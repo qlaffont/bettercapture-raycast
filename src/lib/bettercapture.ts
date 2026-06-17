@@ -96,7 +96,14 @@ export async function relayShortcut(name: string): Promise<void> {
     );
   }
 
-  const action = carbonShortcutToAppleScript(shortcut);
+  let action: string;
+  try {
+    action = carbonShortcutToAppleScript(shortcut);
+  } catch (e) {
+    throw new BetterCaptureError(
+      e instanceof Error ? e.message : "Unsupported shortcut key.",
+    );
+  }
   const script = `
     tell application "System Events"
       ${action}
@@ -119,7 +126,7 @@ export function getRecordingsDirectory(): string {
 export async function openRecordingsFolder(): Promise<void> {
   const directory = getRecordingsDirectory();
   mkdirSync(directory, { recursive: true });
-  execSync(`open "${directory}"`);
+  await open(directory);
 }
 
 export async function toggleRecording(): Promise<void> {
